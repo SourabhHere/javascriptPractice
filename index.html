@@ -1,0 +1,105 @@
+<!-- HTML page for namespace 1 -->
+<!DOCTYPE html>
+<html>
+
+<head>
+	<title>Chat Bot</title>
+	<style>
+		.divClass {
+			height: 350px;
+			width: 100%;
+			border: 1px solid;
+			background-color: #1aa3e2;
+			overflow:scroll;
+		}
+	</style>
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+</head>
+
+<body>
+
+	<h1 style="margin: auto;display: block">Send Message via Socket.io</h1>
+	<center>
+		<table width = "50%">
+			<form id="form">
+				<tr>
+					<td>user name</td>
+					</td>
+					<td><input id="user_name"></td>
+				</tr>
+				<tr>
+					<td>message</td>
+					</td>
+					<td><input id="message" /></td>
+				</tr>
+				<tr>
+					<td> </td>
+					</td>
+					<td><input type="submit" value="send to your namespace" /></td>
+				</tr>
+			</form>
+			<tr>
+				<td><button id="group1">join group 1</button></td>
+				<td><button id="group2">join group 2</button></td>
+			</tr>
+			<tr>
+				<td><button id="group1Send">send to group 1</button></td>
+				<td><button id="group2Send">send to gruop 2</button></td>
+			</tr>
+			<tr>
+				<td colspan = "2">
+						<div id = "output" class = "divClass">Messages</div>
+				</td>
+				<td>
+				</td>
+			</tr>
+		</table>
+	</center>
+</body>
+<script type="text/javascript" src="/socket.io/socket.io.js"></script>
+<script type="text/javascript">
+	let socket = io.connect('http://localhost:4000/my-namespace1');
+	let output = document.getElementById('output');
+	socket.on('connect', function (data) {
+		socket.on('message-server', function (data, room) {
+			if(room == 'room1')
+			 output.innerHTML += '<p>' +"group1: " + data + '</p><br>';
+			else if(room == 'room2')
+			 output.innerHTML += '<p>' +"group2: " + data + '</p><br>';
+			 else
+			 output.innerHTML += '<p>' + data + '</p><br>';
+		});
+	});
+	$('#form').submit(function (e) {
+		e.preventDefault();
+		let user_name = $('#user_name').val();
+		let message = $('#message').val();
+		socket.emit('message-client', user_name, message);
+	});
+	$('#group1').click(function (e) {
+		e.preventDefault();
+		let room = 'room1';
+		let user_name = $('#user_name').val();
+		socket.emit('join-room',user_name, room);
+	});
+	$('#group2').click(function (e) {
+		let room = 'room2';
+		let user_name = $('#user_name').val();
+		socket.emit('join-room',user_name, room);
+	});
+
+	$('#group1Send').click(function (e) {
+		e.preventDefault();
+		let user_name = $('#user_name').val();
+		let message = $('#message').val();
+		socket.emit('message-client-grp1', user_name, message);
+	});
+	$('#group2Send').click(function (e) {
+		e.preventDefault();
+		let user_name = $('#user_name').val();
+		let message = $('#message').val();
+		socket.emit('message-client-grp2', user_name, message);
+	});
+</script>
+
+</html>
